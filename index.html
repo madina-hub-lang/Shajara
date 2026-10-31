@@ -1,0 +1,168 @@
+<!DOCTYPE html><html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shajara — Oila daraxti</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f3f6f1;
+      color: #243526;
+    }
+    header {
+      background: #245c3b;
+      color: white;
+      padding: 24px 16px;
+      text-align: center;
+    }
+    header h1 { margin: 0 0 8px; }
+    main {
+      max-width: 850px;
+      margin: 25px auto;
+      padding: 0 15px;
+    }
+    .card {
+      background: white;
+      padding: 22px;
+      border-radius: 14px;
+      box-shadow: 0 3px 14px #00000010;
+      margin-bottom: 20px;
+    }
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin: 6px 0;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    input { border: 1px solid #ccd5cc; }
+    button {
+      border: none;
+      background: #287447;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover { background: #1d5935; }
+    .person {
+      border: 1px solid #dce7dc;
+      border-left: 5px solid #287447;
+      border-radius: 9px;
+      padding: 14px;
+      margin: 10px 0;
+      background: #fbfdfb;
+    }
+    .person strong { font-size: 18px; }
+    .delete {
+      width: auto;
+      padding: 7px 12px;
+      background: #b83c3c;
+    }
+    footer { text-align: center; padding: 20px; color: #647064; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🌳 Shajara</h1>
+    <p>Oilangiz tarixini avlodlar uchun saqlang</p>
+  </header>  <main>
+    <section class="card">
+      <h2>Oila a'zosini qo‘shish</h2>
+      <form id="personForm">
+        <input id="name" placeholder="Ism va familiya" required>
+        <input id="birth" type="number" min="1" max="9999"
+               placeholder="Tug‘ilgan yili (ixtiyoriy)">
+        <input id="relation" placeholder="Qarindoshligi (masalan, bobom)">
+        <input id="about" placeholder="Qisqacha ma'lumot">
+        <button type="submit">+ A'zoni qo‘shish</button>
+      </form>
+    </section><section class="card">
+  <h2>Oila a'zolari</h2>
+  <div id="people">
+    <p id="empty">Hozircha a'zolar yo‘q. Birinchi a'zoni qo‘shing.</p>
+  </div>
+</section>
+
+  </main>  <footer>© Shajara — Oila xotirasi</footer>  <script>
+    const form = document.getElementById('personForm');
+    const people = document.getElementById('people');
+
+    let members = [];
+    try {
+      members = JSON.parse(localStorage.getItem('shajaraMembers') || '[]');
+      if (!Array.isArray(members)) members = [];
+    } catch {
+      members = [];
+    }
+
+    function render() {
+      people.replaceChildren();
+
+      if (members.length === 0) {
+        const empty = document.createElement('p');
+        empty.textContent = "Hozircha a'zolar yo‘q. Birinchi a'zoni qo‘shing.";
+        people.appendChild(empty);
+        return;
+      }
+
+      members.forEach((member, index) => {
+        const card = document.createElement('div');
+        card.className = 'person';
+
+        const title = document.createElement('strong');
+        title.textContent = member.name;
+        card.appendChild(title);
+
+        if (member.birth) {
+          const year = document.createElement('p');
+          year.textContent = 'Tug‘ilgan yili: ' + member.birth;
+          card.appendChild(year);
+        }
+
+        if (member.relation) {
+          const relation = document.createElement('p');
+          relation.textContent = 'Qarindoshligi: ' + member.relation;
+          card.appendChild(relation);
+        }
+
+        if (member.about) {
+          const about = document.createElement('p');
+          about.textContent = member.about;
+          card.appendChild(about);
+        }
+
+        const remove = document.createElement('button');
+        remove.className = 'delete';
+        remove.textContent = "O‘chirish";
+        remove.addEventListener('click', () => {
+          if (confirm("Bu a'zoni o‘chirmoqchimisiz?")) {
+            members.splice(index, 1);
+            save();
+          }
+        });
+        card.appendChild(remove);
+        people.appendChild(card);
+      });
+    }
+
+    function save() {
+      localStorage.setItem('shajaraMembers', JSON.stringify(members));
+      render();
+    }
+
+    form.addEventListener('submit', event => {
+      event.preventDefault();
+      members.push({
+        name: document.getElementById('name').value.trim(),
+        birth: document.getElementById('birth').value,
+        relation: document.getElementById('relation').value.trim(),
+        about: document.getElementById('about').value.trim()
+      });
+      save();
+      form.reset();
+    });
+
+    render();
+  </script></body>
+</html>
